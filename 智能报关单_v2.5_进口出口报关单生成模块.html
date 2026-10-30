@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>智能报关单｜单证解析工作台</title>
+<style>
+:root{--navy:#173653;--blue:#2162c5;--bg:#f2f6fa;--line:#dce5ee;--ink:#20364b;--muted:#71859a;--red:#e53935;--green:#159568}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 "Microsoft YaHei",Arial,sans-serif}
+.top{height:68px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 24px;gap:16px;position:sticky;top:0;z-index:5}
+.brand{font-size:20px;font-weight:800;display:flex;align-items:center;gap:12px}.brandmark{width:38px;height:42px;background:#183e65;color:#fff;border-radius:8px;display:grid;place-items:center;font-size:22px}
+.topnote{color:var(--muted);font-size:12px}.wrap{max-width:1600px;margin:18px auto;padding:0 16px}
+.uploadbar{background:white;border:1px solid var(--line);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+button,.btn{border:1px solid var(--line);background:#fff;color:var(--ink);padding:9px 13px;border-radius:8px;font:inherit;cursor:pointer}
+button.primary{background:var(--blue);color:white;border-color:var(--blue)}button:disabled{opacity:.45;cursor:not-allowed}
+.filetabs{display:flex;gap:8px;flex:1;overflow:auto}.tab{min-width:118px;text-align:left;background:#f8fafc}.tab.active{background:#174eaa;color:#fff;border-color:#174eaa}.tab small{display:block;opacity:.8}
+.workspace{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:12px;align-items:stretch;height:calc(100vh - 250px);min-height:480px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:13px;overflow:hidden;box-shadow:0 4px 16px #1736530a}
+.panelhead{height:48px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e8eef4;font-size:16px;font-weight:800}
+.pdfbar{background:#183a5a;color:#fff;height:42px;padding:0 14px;display:flex;align-items:center;gap:12px;font-size:12px}.pdfbar .spacer{flex:1}.pdfbar button{padding:3px 8px;background:#294e70;color:#fff;border:0}
+.pdfstage{height:calc(100% - 90px);min-height:390px;overflow:auto;background:#e9eef3;padding:12px;display:flex;justify-content:center;align-items:flex-start}
+.paper{position:relative;background:#fff;box-shadow:0 2px 12px #20304025;flex:0 0 auto;max-width:none}.paper canvas{display:block;max-width:100%;height:auto}
+.textpreview{display:none;white-space:pre-wrap;background:white;padding:22px;min-height:500px;line-height:1.9;overflow-wrap:anywhere}
+.rightbody{padding:10px 12px;height:calc(100% - 48px);overflow:auto}.filters{display:flex;gap:7px;flex-wrap:wrap;padding-bottom:10px;border-bottom:1px solid #edf1f5}.filter{border-radius:18px;background:#f4f7fa;border:0;padding:6px 12px;font-size:12px}.filter.active{background:#e5efff;color:#1559b9}
+.group-title{font-weight:800;margin:13px 0 7px;color:#254766}.fieldrow{display:grid;grid-template-columns:minmax(150px,1.2fr) minmax(130px,1fr) minmax(130px,.8fr) auto auto;gap:9px;align-items:center;border:1px solid #e8eef4;border-radius:9px;padding:10px 11px;margin:7px 0;background:#fff}
+.flabel{font-size:12px;color:#5e7590}.fvalue{font-weight:600;overflow-wrap:anywhere}.source{font-size:11px;color:#67809a;line-height:1.6}.status{font-size:11px;background:#e3f5ec;color:#16865d;padding:4px 8px;border-radius:12px;white-space:nowrap}.edit{border:0;background:transparent;color:#42617f;padding:4px}
+.tablewrap{overflow:auto;border:1px solid #e8eef4;border-radius:8px}table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:9px 8px;text-align:left;border-bottom:1px solid #edf1f5;white-space:nowrap}th{background:#f5f8fb;color:#526b83}
+.bottom{display:grid;grid-template-columns:1fr;gap:12px;margin-top:14px}.warningbox{background:#fffafa;border:1px solid #ffc9c6;border-radius:11px;padding:14px}.warningbox h3{margin:0 0 4px;color:#bf3531;font-size:16px}.warningbox p{margin:0 0 8px;color:#d45b56;font-size:12px}.issue{padding:12px;background:#fff;border:1px solid #ffe3e1;border-radius:9px;margin-top:9px;font-size:12px}.issue-head{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:8px}.issue-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.issue-source{background:#fff7f6;border:1px solid #f5d7d4;border-radius:7px;padding:9px;min-width:0}.issue-source b{display:block;color:#9f302b;margin-bottom:4px}.issue-source p{margin:3px 0;color:#526b83;overflow-wrap:anywhere}.issue-edit{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.issue-edit label{display:block;color:#60778d;font-size:11px}.issue-edit input,.issue-edit textarea,.issue-edit select{width:100%;margin-top:4px;border:1px solid #d5e0eb;border-radius:6px;padding:7px;font:inherit;background:#fff;color:var(--ink)}.issue-edit textarea{grid-column:1/-1;min-height:48px}.issue-actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:8px}.issue-actions button{padding:6px 10px;font-size:12px}.review-state{font-size:11px;border-radius:12px;padding:4px 8px;background:#fff0d8;color:#94620c}.review-state.done{background:#e3f5ec;color:#16865d}@media(max-width:700px){.issue-grid,.issue-edit{grid-template-columns:1fr}}
+.inline-edit{width:100%;min-width:0;border:1px solid #9bbce8;border-radius:7px;padding:7px 9px;font:inherit;color:var(--ink);background:#fff}.inline-actions{display:flex;gap:6px;margin-top:7px}.inline-actions button{padding:5px 9px;font-size:12px}.fieldmain{min-width:0}.fieldrow.is-editing{background:#f6faff;border-color:#9bbce8}.note-inline{width:100%;margin-top:6px;border:1px solid #d5e0eb;border-radius:6px;padding:6px;font:12px inherit;resize:vertical}
+.footerbar{background:#fff;border:1px solid var(--line);border-radius:10px;margin-top:12px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;color:#5f7690;font-size:12px}
+.empty{padding:70px 20px;text-align:center;color:#8092a4}.hidden{display:none!important}
+@media(max-width:700px){.workspace{grid-template-columns:1fr;height:auto}.panel{min-height:460px}.pdfstage{height:520px}.rightbody{height:520px}.bottom{grid-template-columns:1fr}.fieldrow{grid-template-columns:minmax(0,1fr) auto}.fieldmain{grid-column:1/-1}.source{grid-column:1/-1}.status{justify-self:start}}
+
+.decl-section{margin-top:14px;background:#fff;border:1px solid var(--line);border-radius:13px;padding:16px;box-shadow:0 4px 16px #1736530a}
+.decl-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.decl-head h2{font-size:18px;margin:0;color:#203d59}
+.decl-switch{display:flex;gap:8px;flex-wrap:wrap}
+.decl-switch button.active{background:#174eaa;color:#fff;border-color:#174eaa}
+.decl-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.decl-field label{display:block;font-size:12px;color:#617990;margin-bottom:4px}
+.decl-field input,.decl-field select,.decl-field textarea{width:100%;min-width:0;border:1px solid #d5e0eb;border-radius:7px;padding:8px 9px;font:inherit;color:var(--ink);background:#fff}
+.decl-field textarea{min-height:58px;resize:vertical}
+.decl-subtitle{font-weight:800;color:#254766;margin:17px 0 8px}
+.decl-products{overflow:auto;border:1px solid #e5ebf1;border-radius:8px}
+.decl-products table{min-width:850px}
+.decl-products input{width:100%;min-width:70px;border:1px solid #d5e0eb;border-radius:5px;padding:6px;font:inherit}
+.decl-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+.decl-note{font-size:12px;color:#8a641e;background:#fff8e9;border:1px solid #f1dfb9;padding:10px 12px;border-radius:8px;margin-top:12px}
+.decl-preview{display:none;margin-top:16px;border:1px solid #bdc9d5;background:#fff;padding:18px;overflow:auto}
+.decl-preview.show{display:block}
+.decl-preview h2{text-align:center;font-family:"SimSun",serif;font-size:22px;margin:0 0 14px;color:#111}
+.decl-preview table{width:100%;border-collapse:collapse;font-size:11px;color:#111}
+.decl-preview td,.decl-preview th{border:1px solid #333;padding:6px 5px;white-space:normal;vertical-align:top;height:32px}
+.decl-preview .redhint{color:#a33}
+.decl-preview .items td{height:42px}
+@media(max-width:900px){.decl-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.decl-grid{grid-template-columns:1fr}}
+@media print{
+ body.print-declaration *{visibility:hidden!important}
+ body.print-declaration #declarationPreview,body.print-declaration #declarationPreview *{visibility:visible!important}
+ body.print-declaration #declarationPreview{display:block!important;position:absolute;left:0;top:0;width:100%;margin:0;border:0;padding:0;overflow:visible}
+ body.print-declaration #declarationPreview h2{font-size:18px}
+ body.print-declaration #declarationPreview table{font-size:9px}
+ @page{size:A4 landscape;margin:10mm}
+}
+
+</style>
+</head>
+<body>
+<header class="top"><div class="brand"><span class="brandmark">▤</span><span>智能报关单<div class="topnote">AI CUSTOMS DECLARATION · DOCUMENT REVIEW WORKSPACE</div></span></div><div class="topnote">企业单证识别与人工复核工作台</div></header>
+<main class="wrap">
+ <section class="uploadbar">
+  <input id="files" type="file" multiple accept=".pdf,.txt,.csv,.png,.jpg,.jpeg" hidden>
+  <button class="primary" id="choose">＋ 上传单证</button><button id="run" disabled>开始解析</button><button id="clear">清空</button>
+  <div class="filetabs" id="tabs"><span class="topnote">请上传合同、发票、装箱单、提单等文件</span></div>
+ </section>
+ <section class="workspace">
+  <div class="panel">
+   <div class="panelhead"><span>▤ 原始单证预览</span><span class="topnote" id="pdfname">等待上传文件</span></div>
+   <div class="pdfbar"><span id="pageno">第 - / - 页</span><span class="spacer"></span><button id="prev">−</button><span id="zoom">100%</span><button id="next">＋</button><button id="fit">适应</button><button id="rotL" title="逆时针旋转90度">↶ 旋转</button><button id="rotR" title="顺时针旋转90度">↷ 旋转</button><button id="rot0" title="恢复原始方向">复位</button></div>
+   <div class="pdfstage" id="stage"><div class="empty">上传 PDF 后，这里将显示原始单证。<br>文本类文件将显示提取后的原文。</div></div>
+   <div class="textpreview" id="txtpreview"></div>
+  </div>
+  <div class="panel">
+   <div class="panelhead"><span>▤ 识别结果</span><span class="topnote" id="recognized">尚未解析</span></div>
+   <div class="rightbody">
+    <div class="filters" id="filters"><button class="filter active" data-filter="全部">◎ 全部</button><button class="filter" data-filter="合同信息">合同信息</button><button class="filter" data-filter="商品信息">商品信息</button><button class="filter" data-filter="其他信息">其他信息</button></div>
+    <div id="fieldgroups"><div class="empty">上传并解析单证后，识别字段会在这里按类别展示。</div></div>
+   </div>
+  </div>
+ </section>
+ <section class="bottom">
+  <div class="warningbox"><h3>❗ 疑似信息与交叉核验</h3><p>逐项显示发生差异的两个文件、所属环节、页码及原文线索。可分别修改双方核对值、填写审核意见并保存；人工审核不会自动覆盖原始识别值。</p><div id="issues"><div class="empty" style="padding:22px">尚未发现或尚未解析疑似信息</div></div></div>
+  </section>
+
+ <section class="decl-section" id="declarationModule">
+  <div class="decl-head">
+   <div><h2>⑤ 报关单生成</h2><div class="topnote">根据已识别字段生成进口或出口报关单草稿；所有字段均可人工修改</div></div>
+   <div class="decl-switch"><button type="button" class="active" data-decl-mode="export">出口报关单</button><button type="button" data-decl-mode="import">进口报关单</button></div>
+  </div>
+  <div class="decl-note">请先选择业务类型。系统会尝试带入已识别信息；未识别字段保持空白并提示人工填写，不会自动编造。此处为依据你提供的样板制作的可编辑草稿，不等同于海关单一窗口正式申报回执或官方制式文件。</div>
+  <div class="decl-subtitle">一、报关单基本信息</div>
+  <div class="decl-grid" id="declFields"></div>
+  <div class="decl-subtitle">二、商品信息</div>
+  <div class="decl-products"><table><thead><tr><th>项号</th><th>商品编号（HS编码）</th><th>商品名称及规格型号</th><th>数量及单位</th><th>单价/总价/币制</th><th>原产国（地区）</th><th>最终目的国（地区）</th><th>操作</th></tr></thead><tbody id="declProducts"></tbody></table></div>
+  <div class="decl-actions">
+   <button type="button" id="addDeclProduct">＋ 添加商品行</button>
+   <button type="button" class="primary" id="saveDecl">保存报关单草稿</button>
+   <button type="button" id="makeDeclPreview">生成报关单预览</button>
+   <button type="button" id="printDecl" disabled>打印 / 另存为 PDF</button>
+   <span class="topnote" id="declSaveState">尚未保存</span>
+  </div>
+  <div class="decl-preview" id="declarationPreview"></div>
+ </section>
+
+ <div class="footerbar"><span id="stats">共 0 份文件｜已识别 0 个字段｜待核对 0 项</span><div><button id="export">导出核对结果</button></div></div>
+ <p class="topnote" style="padding:4px 3px">原型说明：文件在当前浏览器本地解析，不会主动上传到服务器。PDF 预览支持翻页、缩放与旋转；扫描件文字识别需另行接入 OCR。识别结果仅供人工复核，HS 编码不自动推断。</p>
+</main>
+<script>
+const $=s=>document.querySelector(s);let docs=[],active=0,pageNo=1,scale=0,rotation=0,pdfDoc=null,fieldData=[],selected=-1,filter='全部',issueData=[],issueReviews={};
+const pdfjs='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+function load(src){return new Promise((ok,no)=>{let x=document.createElement('script');x.src=src;x.onload=ok;x.onerror=no;document.head.append(x)})}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+$('#choose').onclick=()=>$('#files').click();
+$('#files').onchange=e=>{docs.push(...[...e.target.files].map(file=>({file,name:file.name,text:'',pages:[],status:'待解析'})));renderTabs();$('#run').disabled=!docs.length;e.target.value=''};
+$('#clear').onclick=()=>{docs=[];fieldData=[];active=0;pdfDoc=null;renderTabs();renderFields();$('#stage').innerHTML='<div class="empty">上传 PDF 后，这里将显示原始单证。</div>';$('#stats').textContent='共 0 份文件｜已识别 0 个字段｜待核对 0 项'};
+function renderTabs(){ $('#tabs').innerHTML=docs.length?docs.map((d,i)=>`<button class="tab ${i===active?'active':''}" data-i="${i}">📄 ${esc(d.name)}<small>${i+1}/${docs.length} · ${esc(d.status)}</small></button>`).join(''):'<span class="topnote">请上传合同、发票、装箱单、提单等文件</span>';document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{active=+b.dataset.i;pageNo=1;renderTabs();showDoc()})}
+async function parseOne(d){
+ const ext=d.name.split('.').pop().toLowerCase();
+ if(ext==='pdf'){
+  if(!window.pdfjsLib)await load(pdfjs);pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  const pdf=await pdfjsLib.getDocument({data:await d.file.arrayBuffer()}).promise;d.pdf=pdf;d.pages=[];
+  for(let n=1;n<=pdf.numPages;n++){const p=await pdf.getPage(n),c=await p.getTextContent();d.pages.push({items:c.items.map(it=>({str:it.str,transform:it.transform,width:it.width,height:it.height})),text:c.items.map(x=>x.str).join(' ')});}
+  d.text=d.pages.map((p,i)=>`[第${i+1}页]\n${p.text}`).join('\n\n');d.status='解析成功';return;
+ }
+ if(ext==='txt'||ext==='csv'){d.text=await d.file.text();d.status='解析成功';return}
+ d.text='该文件格式当前版本尚未接入解析。请先转换为 PDF、TXT 或 CSV。';d.status='暂不支持';
+}
+$('#run').onclick=async()=>{for(const d of docs){if(d.status==='待解析'){d.status='解析中';renderTabs();try{await parseOne(d)}catch(e){d.status='解析失败';d.error=e.message}}}renderTabs();buildFields();showDoc()};
+function categoryFor(name){if(/合同|contract|invoice|发票/i.test(name))return '合同信息';if(/商品|product|货物/i.test(name))return '商品信息';return '其他信息'}
+const rules=[
+ {key:'合同编号',cat:'合同信息',re:/(?:Contract\s*(?:No\.?|Number)|合同编号|合同号)\s*[:：]?\s*([A-Z0-9][A-Z0-9\-\/]+)/i},
+ {key:'供应商名称',cat:'合同信息',re:/(?:Seller|Vendor|Supplier|供应商)\s*[:：]?\s*([^\n]{3,90})/i},
+ {key:'采购方名称',cat:'合同信息',re:/(?:Buyer|Purchaser|买方|采购方)\s*[:：]?\s*([^\n]{3,100})/i},
+ {key:'发票编号',cat:'合同信息',re:/(?:Invoice\s*(?:No\.?|Number)|发票编号|发票号)\s*[:：]?\s*([A-Z0-9][A-Z0-9\-\/]+)/i},
+ {key:'贸易术语',cat:'合同信息',re:/\b(EXW|FCA|CPT|CIP|DAP|DPU|DDP|FAS|FOB|CFR|CIF)(?:\s+[A-Z]{3})?/i},
+ {key:'币种',cat:'合同信息',re:/\b(CNY|USD|EUR|RMB)\b/i},
+ {key:'总金额',cat:'其他信息',re:/(?:TOTAL|Grand\s+Total|Total\s+Value|Total\s+Amount|总金额|合计)[^\d]{0,35}([\d,]+\.\d{2})/i},
+ {key:'提单号',cat:'其他信息',re:/(?:B\/L\s*(?:No\.?|Number)?|Bill\s+of\s+Lading\s*(?:No\.?|Number)?|提单号)\s*[:：]?\s*([A-Z0-9][A-Z0-9\-\/]+)/i},
+ {key:'毛重',cat:'其他信息',re:/(?:Gross\s*Weight|Gross\s*Wt\.?|毛重)\s*[:：]?\s*([\d,.]+\s*(?:KG|KGS|千克)?)/i},
+ {key:'净重',cat:'其他信息',re:/(?:Net\s*Weight|Net\s*Wt\.?|净重)\s*[:：]?\s*([\d,.]+\s*(?:KG|KGS|千克)?)/i},
+ {key:'包装件数',cat:'其他信息',re:/(?:Packages?|Package\s*Count|No\.?\s*of\s*Packages|件数|包装件数)\s*[:：]?\s*(\d+\s*(?:CTNS?|CARTONS?|PKGS?|PACKAGES?|PCS?)?)/i}
+];
+function stage(name){if(/合同|contract/i.test(name))return'合同环节';if(/发票|invoice/i.test(name))return'商业发票环节';if(/箱单|装箱|packing/i.test(name))return'装箱单环节';if(/提单|运单|bill|airway|awb/i.test(name))return'运输单据环节';return'其他单证环节'}
+function buildFields(){
+ fieldData=[];
+ for(const r of rules){let hit=null;
+  for(let di=0;di<docs.length&&!hit;di++){const d=docs[di];if(d.status!=='解析成功')continue;
+   const chunks=d.pages?.length?d.pages.map((p,i)=>({text:p.text,page:i+1})): [{text:d.text,page:1}];
+   for(const ch of chunks){const m=ch.text.match(r.re);if(m){hit={value:(m[1]||m[0]).trim(),doc:di,page:ch.page,stage:stage(d.name),evidence:ch.text,matched:m[1]||m[0]};break}}
+  }
+  fieldData.push({key:r.key,cat:r.cat,value:hit?.value||'',source:hit?docs[hit.doc].name:'未找到原文',page:hit?.page||'',stage:hit?.stage||'待人工补充',evidence:hit?.evidence||'',doc:hit?.doc??-1,status:hit?'待人工核对':'未识别',note:''});
+ }
+ // Infer simple product rows only when tabular source text has clear repeated item patterns.
+ const productDoc=docs.find(d=>d.status==='解析成功'&&/contract|invoice|发票|合同/i.test(d.name));
+ if(productDoc){const text=productDoc.text;const re=/([A-Z][A-Za-z][A-Za-z0-9 ]{4,45})\s+(\d{10})\s+(\d+(?:\.\d+)?\s*(?:PC|PCS|KG))\s+([\d,]+\.\d{2})\s+([\d,]+\.\d{2})/g;let m;productDoc.products=[];while((m=re.exec(text)))productDoc.products.push({name:m[1].trim(),hs:m[2],qty:m[3],unit:m[4],total:m[5]});}
+ renderFields();renderIssues();
+}
+function renderFields(){
+ const cats=['合同信息','商品信息','其他信息'];const visible=fieldData.filter(f=>filter==='全部'||f.cat===filter);
+ $('#fieldgroups').innerHTML=cats.filter(c=>visible.some(f=>f.cat===c)).map(c=>`<div class="group-title">▣ ${c}</div>${visible.filter(f=>f.cat===c).map(f=>{let i=fieldData.indexOf(f),editing=selected===i;return `<div class="fieldrow ${editing?'is-editing':''}"><div class="fieldmain"><div class="flabel">${esc(f.key)}</div>${editing?`<input class="inline-edit" id="inline-value-${i}" value="${esc(f.value)}" placeholder="请输入或修改识别值"><textarea class="note-inline" id="inline-note-${i}" rows="2" placeholder="备注（可选）">${esc(f.note||'')}</textarea><div class="inline-actions"><button class="primary" data-save-inline="${i}">保存</button><button data-cancel-inline="${i}">取消</button></div>`:`<div class="fvalue">${esc(f.value||'待人工填写')}</div>`}</div><div class="source">来源文件：${esc(f.source)}<br>页码：${f.page||'—'}</div><div class="source">环节：${esc(f.stage)}</div><span class="status" style="${f.status==='人工已确认/修改'?'background:#e5efff;color:#1559b9':(f.value?'':'background:#fff2df;color:#a76a13')}">${esc(f.status|| (f.value?'待核对':'未识别'))}</span>${editing?'<span></span>':`<button class="edit" data-edit="${i}" title="直接编辑此字段">✎</button>`}</div>`}).join('')}`).join('')||'<div class="empty">该分类暂无字段</div>';
+ document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>{selected=+b.dataset.edit;renderFields();const input=$(`#inline-value-${selected}`);if(input){input.focus();input.select()}});
+ document.querySelectorAll('[data-save-inline]').forEach(b=>b.onclick=()=>{const i=+b.dataset.saveInline;fieldData[i].value=$(`#inline-value-${i}`).value.trim();fieldData[i].note=$(`#inline-note-${i}`).value.trim();fieldData[i].status='人工已确认/修改';selected=-1;renderFields();renderIssues()});
+ document.querySelectorAll('[data-cancel-inline]').forEach(b=>b.onclick=()=>{selected=-1;renderFields()});
+ const prod=docs.find(d=>d.products?.length);if(prod){$('#fieldgroups').insertAdjacentHTML('beforeend',`<div class="group-title">▣ 商品明细（从文本线索提取，需人工核对）</div><div class="tablewrap"><table><thead><tr><th>商品名称</th><th>HS编码</th><th>数量</th><th>总价</th></tr></thead><tbody>${prod.products.map(p=>`<tr><td>${esc(p.name)}</td><td>${esc(p.hs)}</td><td>${esc(p.qty)}</td><td>${esc(p.total)}</td></tr>`).join('')}</tbody></table></div>`)}
+ $('#recognized').textContent=`已识别 ${fieldData.filter(f=>f.value).length} 个字段`;
+ $('#stats').textContent=`共 ${docs.length} 份文件｜已识别 ${fieldData.filter(f=>f.value).length} 个字段｜待核对 ${fieldData.filter(f=>f.value).length} 项`;
+}
+function extractIssueHits(rule){
+ const hits=[];
+ docs.forEach((d,di)=>{
+  if(d.status!=='解析成功')return;
+  const chunks=d.pages?.length?d.pages.map((p,i)=>({text:p.text,page:i+1})): [{text:d.text,page:1}];
+  for(const ch of chunks){
+   const re=new RegExp(rule.re.source,rule.re.flags.includes('g')?rule.re.flags:rule.re.flags+'g');
+   const m=re.exec(ch.text);if(!m)continue;
+   const value=(m[1]||m[0]).trim();
+   const at=m.index,from=Math.max(0,at-90),to=Math.min(ch.text.length,at+m[0].length+110);
+   const before=ch.text.slice(0,at);
+   const headings=before.split(/\n+/).map(x=>x.trim()).filter(Boolean);
+   const section=(headings.slice(-2).join(' / ')||'正文内容').slice(-100);
+   hits.push({doc:di,name:d.name,value,page:ch.page,stage:stage(d.name),section,evidence:ch.text.slice(from,to).replace(/\s+/g,' ').trim()});
+   break;
+  }
+ });
+ return hits;
+}
+function renderIssues(){
+ const candidates=[];
+ for(const r of rules){
+  const hits=extractIssueHits(r);
+  if(hits.length<2)continue;
+  const normalized=hits.map(h=>h.value.replace(/[,\s]/g,'').toUpperCase());
+  if(new Set(normalized).size>1){
+   const base=hits[0];
+   hits.slice(1).filter((h,i)=>h.value.replace(/[,\s]/g,'').toUpperCase()!==base.value.replace(/[,\s]/g,'').toUpperCase()).forEach((other,j)=>{
+    candidates.push({id:`${r.key}-${base.doc}-${other.doc}`,field:r.key,a:base,b:other,explain:`${base.name} 与 ${other.name} 对同一字段的记录不一致`});
+   });
+  }
+ }
+ // Restore saved human review values when this issue is regenerated.
+ issueData=candidates.map(x=>({...x,review:issueReviews[x.id]||{status:'待审核',aValue:x.a.value,bValue:x.b.value,note:''}}));
+ $('#issues').innerHTML=issueData.length?issueData.map((x,i)=>{
+  const v=x.review;
+  return `<article class="issue" data-issue="${i}">
+   <div class="issue-head"><strong>⚠ ${esc(x.field)}：发现跨文件差异</strong><span class="review-state ${v.status!=='待审核'?'done':''}">${esc(v.status)}</span></div>
+   <div style="color:#71859a;margin-bottom:8px">${esc(x.explain)}</div>
+   <div class="issue-grid">
+    <div class="issue-source"><b>文件 A：${esc(x.a.name)}</b><p>所属环节：${esc(x.a.stage)}</p><p>页码：第 ${x.a.page} 页</p><p>原文上下文：${esc(x.a.evidence)}</p><p><strong>识别值：${esc(x.a.value)}</strong></p><p>原文线索：${esc(x.a.evidence)}</p></div>
+    <div class="issue-source"><b>文件 B：${esc(x.b.name)}</b><p>所属环节：${esc(x.b.stage)}</p><p>页码：第 ${x.b.page} 页</p><p>原文上下文：${esc(x.b.evidence)}</p><p><strong>识别值：${esc(x.b.value)}</strong></p><p>原文线索：${esc(x.b.evidence)}</p></div>
+   </div>
+   <div class="issue-edit">
+    <label>文件 A 核对值<input data-iv="a" value="${esc(v.aValue)}"></label>
+    <label>文件 B 核对值<input data-iv="b" value="${esc(v.bValue)}"></label>
+    <label style="grid-column:1/-1">审核意见 / 修改说明<textarea data-iv="note" placeholder="填写差异原因、采用哪个文件的数据或后续处理意见">${esc(v.note)}</textarea></label>
+   </div>
+   <div class="issue-actions"><button class="primary" data-issue-save="${i}">保存审核结果</button><button data-issue-accept="${i}">标记为已核对一致</button><span class="source">保存后保留文件名、页码、环节及双方核对值。</span></div>
+  </article>`;
+ }).join(''):'<div class="empty" style="padding:22px">未发现明确的跨文件字段差异。请注意：未识别到差异不代表单证内容必然正确。</div>';
+ document.querySelectorAll('[data-issue-save]').forEach(btn=>btn.onclick=()=>saveIssue(+btn.dataset.issue,false));
+ document.querySelectorAll('[data-issue-accept]').forEach(btn=>btn.onclick=()=>saveIssue(+btn.dataset.issue,true));
+}
+function saveIssue(i,accepted){
+ const x=issueData[i];if(!x)return;
+ const card=document.querySelector(`[data-issue="${i}"]`);
+ const read=k=>card.querySelector(`[data-iv="${k}"]`).value.trim();
+ const prior=x.review;
+ const review={aValue:read('a'),bValue:read('b'),note:read('note'),status:accepted?'已核对':'已审核保存'};
+ if(accepted&&!review.note)review.note='人工已确认该项无需进一步处理。';
+ issueReviews[x.id]=review;
+ try{localStorage.setItem('customs_issue_reviews',JSON.stringify(issueReviews))}catch(e){}
+ x.review=review;renderIssues();
+}
+try{issueReviews=JSON.parse(localStorage.getItem('customs_issue_reviews')||'{}')}catch(e){issueReviews={}}
+async function showDoc(){
+ const d=docs[active];
+ $('#pdfname').textContent=d?.name||'等待上传文件';
+ $('#stage').style.display='flex';$('#txtpreview').style.display='none';
+ if(!d){$('#stage').innerHTML='<div class="empty">请上传单证</div>';return}
+ if(d.pdf){
+  pdfDoc=d.pdf;
+  const page=await pdfDoc.getPage(pageNo);
+  const effectiveRotation=((page.rotate||0)+rotation+360)%360;
+  const rawVp=page.getViewport({scale:1,rotation:effectiveRotation});
+  const availableWidth=Math.max(240,$('#stage').clientWidth-28);
+  if(!scale || scale<0.2) scale=Math.min(1.25,availableWidth/rawVp.width);
+  const vp=page.getViewport({scale:scale,rotation:effectiveRotation});
+  const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');
+  canvas.width=Math.ceil(vp.width);canvas.height=Math.ceil(vp.height);
+  canvas.style.width=vp.width+'px';canvas.style.height=vp.height+'px';
+  const paper=document.createElement('div');paper.className='paper';
+  paper.style.width=vp.width+'px';paper.style.height=vp.height+'px';
+  paper.append(canvas);$('#stage').innerHTML='';$('#stage').append(paper);
+  await page.render({canvasContext:ctx,viewport:vp}).promise;
+  $('#pageno').textContent=`第 ${pageNo} / ${pdfDoc.numPages} 页`;
+  $('#zoom').textContent=Math.round(scale*100)+'%';
+ }else{
+  $('#stage').style.display='none';$('#txtpreview').style.display='block';
+  $('#txtpreview').textContent=d.text||d.error||'暂无文本内容';$('#pageno').textContent='文本预览';
+ }
+}
+$('#prev').onclick=()=>{if(pdfDoc&&pageNo>1){pageNo--;showDoc()}};$('#next').onclick=()=>{if(pdfDoc&&pageNo<pdfDoc.numPages){pageNo++;showDoc()}};$('#fit').onclick=()=>{scale=0;showDoc()};
+$('#zoom').onclick=()=>{scale=Math.min(2,scale+.1);showDoc()};
+$('#rotL').onclick=()=>{rotation=(rotation+270)%360;showDoc()};
+$('#rotR').onclick=()=>{rotation=(rotation+90)%360;showDoc()};
+$('#rot0').onclick=()=>{rotation=0;showDoc()};
+$('#filters').onclick=e=>{const b=e.target.closest('[data-filter]');if(!b)return;filter=b.dataset.filter;document.querySelectorAll('.filter').forEach(x=>x.classList.toggle('active',x===b));renderFields()};
+$('#export').onclick=()=>{const fields=fieldData.map(f=>`${f.key}：${f.value||'未填写'}\n来源文件：${f.source}\n页码：${f.page||'—'}\n所属环节：${f.stage}\n备注：${f.note||'—'}`).join('\n\n');const reviews=issueData.map(x=>`疑似字段：${x.field}\n文件A：${x.a.name}｜第${x.a.page}页｜${x.a.stage}\n文件B：${x.b.name}｜第${x.b.page}页｜${x.b.stage}\n文件A核对值：${x.review.aValue}\n文件B核对值：${x.review.bValue}\n审核状态：${x.review.status}\n审核意见：${x.review.note||'—'}`).join('\n\n');const data=fields+'\n\n===== 疑似信息与交叉核验审核记录 =====\n'+(reviews||'暂无审核记录');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'text/plain;charset=utf-8'}));a.download='智能报关单_人工核对结果.txt';a.click();URL.revokeObjectURL(a.href)};
+
+// ===== Declaration draft module (editable import/export drafts) =====
+const declSchemas={
+ export:[
+  ['预录入编号','预录入编号'],['海关编号','海关编号'],['境内发货人','境内发货人'],['出境关别','出境关别'],['出口日期','出口日期'],['申报日期','申报日期'],['备案号','备案号'],
+  ['境外收货人','境外收货人'],['运输方式','运输方式'],['运输工具名称及航次号','运输工具名称及航次号'],['提运单号','提运单号'],['生产销售单位','生产销售单位'],['监管方式','监管方式'],['征免性质','征免性质'],['许可证号','许可证号'],
+  ['合同协议号','合同协议号'],['贸易国（地区）','贸易国（地区）'],['运抵国（地区）','运抵国（地区）'],['指运港','指运港'],['离境口岸','离境口岸'],['包装种类','包装种类'],['件数','件数'],['毛重（千克）','毛重'],['净重（千克）','净重'],
+  ['成交方式','成交方式'],['运费','运费'],['保费','保费'],['杂费','杂费'],['随附单证及编号','随附单证及编号'],['标记唛码及备注','标记唛码及备注'],['申报单位','申报单位']
+ ],
+ import:[
+  ['预录入编号','预录入编号'],['海关编号','海关编号'],['境内收货人','境内收货人'],['进境关别','进境关别'],['进口日期','进口日期'],['申报日期','申报日期'],['备案号','备案号'],
+  ['境外发货人','境外发货人'],['运输方式','运输方式'],['运输工具名称及航次号','运输工具名称及航次号'],['提运单号','提运单号'],['生产销售单位','生产销售单位'],['监管方式','监管方式'],['征免性质','征免性质'],['许可证号','许可证号'],
+  ['合同协议号','合同协议号'],['贸易国（地区）','贸易国（地区）'],['启运国（地区）','启运国（地区）'],['经停/指运港','经停/指运港'],['入境口岸','入境口岸'],['包装种类','包装种类'],['件数','件数'],['毛重（千克）','毛重'],['净重（千克）','净重'],
+  ['成交方式','成交方式'],['运费','运费'],['保费','保费'],['杂费','杂费'],['随附单证及编号','随附单证及编号'],['标记唛码及备注','标记唛码及备注'],['申报单位','申报单位']
+ ]
+};
+let declMode='export',declValues={},declProducts=[];
+const declMap={
+ '合同协议号':['合同编号'],'境外收货人':['供应商名称'],'境外发货人':['供应商名称'],'境内发货人':['采购方名称'],'境内收货人':['采购方名称'],
+ '贸易术语':['贸易术语'],'成交方式':['贸易术语'],'件数':['包装件数'],'毛重（千克）':['毛重'],'净重（千克）':['净重'],'提运单号':['提单号'],'总价':['总金额']
+};
+function findFieldValue(keys){for(const k of keys||[]){const f=fieldData.find(x=>x.key===k&&x.value);if(f)return f.value;}return ''}
+function initDeclValues(){
+ const schema=declSchemas[declMode];const next={};
+ schema.forEach(([label,key])=>{next[label]=declValues[label]??findFieldValue(declMap[label]||[label])});
+ declValues=next;
+ if(!declProducts.length){
+  const productDoc=docs.find(d=>d.products?.length);
+  if(productDoc)declProducts=productDoc.products.map(p=>({hs:p.hs||'',name:p.name||'',qty:p.qty||'',unitPrice:'',total:p.total||'',currency:findFieldValue(['币种'])||'',origin:'',destination:''}));
+ }
+ if(!declProducts.length)declProducts=[{hs:'',name:'',qty:'',unitPrice:'',total:'',currency:findFieldValue(['币种'])||'',origin:'',destination:''}];
+}
+function renderDeclFields(){
+ const container=$('#declFields');
+ container.innerHTML=declSchemas[declMode].map(([label])=>`<div class="decl-field"><label>${esc(label)}</label><input data-decl-field="${esc(label)}" value="${esc(declValues[label]||'')}" placeholder="未识别，请人工填写"></div>`).join('');
+ container.querySelectorAll('[data-decl-field]').forEach(el=>el.oninput=()=>{declValues[el.dataset.declField]=el.value;});
+ renderDeclProducts();
+}
+function renderDeclProducts(){
+ $('#declProducts').innerHTML=declProducts.map((p,i)=>`<tr>
+ <td>${i+1}</td>
+ <td><input data-prod="${i}" data-key="hs" value="${esc(p.hs)}" placeholder="HS编码"></td>
+ <td><input data-prod="${i}" data-key="name" value="${esc(p.name)}" placeholder="商品名称及规格"></td>
+ <td><input data-prod="${i}" data-key="qty" value="${esc(p.qty)}" placeholder="数量/单位"></td>
+ <td><input data-prod="${i}" data-key="unitPrice" value="${esc(p.unitPrice)}" placeholder="单价"><input data-prod="${i}" data-key="total" value="${esc(p.total)}" placeholder="总价"><input data-prod="${i}" data-key="currency" value="${esc(p.currency)}" placeholder="币制"></td>
+ <td><input data-prod="${i}" data-key="origin" value="${esc(p.origin)}" placeholder="原产国/地区"></td>
+ <td><input data-prod="${i}" data-key="destination" value="${esc(p.destination)}" placeholder="最终目的国/地区"></td>
+ <td><button type="button" data-remove-prod="${i}">删除</button></td></tr>`).join('');
+ $('#declProducts').querySelectorAll('[data-prod]').forEach(el=>el.oninput=()=>{declProducts[+el.dataset.prod][el.dataset.key]=el.value;});
+ $('#declProducts').querySelectorAll('[data-remove-prod]').forEach(el=>el.onclick=()=>{declProducts.splice(+el.dataset.removeProd,1);renderDeclProducts()});
+}
+function saveDeclDraft(){
+ const payload={mode:declMode,values:declValues,products:declProducts,savedAt:new Date().toISOString()};
+ try{localStorage.setItem('customs_declaration_draft_v1',JSON.stringify(payload));$('#declSaveState').textContent='草稿已保存至当前浏览器';}
+ catch(e){$('#declSaveState').textContent='浏览器存储失败，请导出/打印留存';}
+}
+function buildDeclPreview(){
+ const labels=declSchemas[declMode],v=declValues;
+ const title=declMode==='export'?'中华人民共和国海关出口货物报关单':'中华人民共和国海关进口货物报关单';
+ const topRows=[
+  [['预录入编号',v['预录入编号']],['海关编号',v['海关编号']],['海关名称',v['海关名称']],['页码/页数','1/1']],
+  [['境内发货人/收货人',v[declMode==='export'?'境内发货人':'境内收货人']],['出境/进境关别',v[declMode==='export'?'出境关别':'进境关别']],['出口/进口日期',v[declMode==='export'?'出口日期':'进口日期']],['申报日期',v['申报日期']],['备案号',v['备案号']]],
+  [['境外收货人/发货人',v[declMode==='export'?'境外收货人':'境外发货人']],['运输方式',v['运输方式']],['运输工具名称及航次号',v['运输工具名称及航次号']],['提运单号',v['提运单号']]],
+  [['生产销售单位',v['生产销售单位']],['监管方式',v['监管方式']],['征免性质',v['征免性质']],['许可证号',v['许可证号']]],
+  [['合同协议号',v['合同协议号']],['贸易国（地区）',v['贸易国（地区）']],['运抵/启运国（地区）',v[declMode==='export'?'运抵国（地区）':'启运国（地区）']],['指运/经停港',v[declMode==='export'?'指运港':'经停/指运港']],['离境/入境口岸',v[declMode==='export'?'离境口岸':'入境口岸']]],
+  [['包装种类',v['包装种类']],['件数',v['件数']],['毛重（千克）',v['毛重（千克）']],['净重（千克）',v['净重（千克）']],['成交方式',v['成交方式']],['运费',v['运费']],['保费',v['保费']],['杂费',v['杂费']]]
+ ];
+ const table=topRows.map(row=>`<tr>${row.map(([k,val])=>`<td><b>${esc(k)}</b><br>${esc(val||'')}</td>`).join('')}</tr>`).join('');
+ const items=declProducts.map((p,i)=>`<tr><td>${i+1}</td><td>${esc(p.hs)}</td><td>${esc(p.name)}</td><td>${esc(p.qty)}</td><td>${esc([p.unitPrice,p.total,p.currency].filter(Boolean).join(' / '))}</td><td>${esc(p.origin)}</td><td>${esc(p.destination)}</td><td>照章征税</td></tr>`).join('');
+ $('#declarationPreview').innerHTML=`<h2>${title}</h2><table><tbody>${table}<tr><td colspan="8"><b>随附单证及编号：</b>${esc(v['随附单证及编号']||'')}</td></tr><tr><td colspan="8"><b>标记唛码及备注：</b>${esc(v['标记唛码及备注']||'')}</td></tr></tbody></table><table class="items" style="margin-top:8px"><thead><tr><th>项号</th><th>商品编号</th><th>商品名称及规格型号</th><th>数量及单位</th><th>单价/总价/币制</th><th>原产国（地区）</th><th>最终目的国（地区）</th><th>征免</th></tr></thead><tbody>${items||'<tr><td colspan="8">请添加商品信息</td></tr>'}</tbody></table><table style="margin-top:8px"><tr><td style="height:58px"><b>报关人员及证号：</b></td><td><b>电话：</b></td><td><b>申报单位：</b>${esc(v['申报单位']||'')}</td><td><b>申报单位（签章）：</b></td></tr></table><p class="redhint">提示：空白字段需人工补齐；商品归类、监管条件、征免方式及申报结论必须由具备资质的人员核实。</p>`;
+ $('#declarationPreview').classList.add('show');$('#printDecl').disabled=false;
+}
+document.querySelectorAll('[data-decl-mode]').forEach(btn=>btn.onclick=()=>{
+ declMode=btn.dataset.declMode;document.querySelectorAll('[data-decl-mode]').forEach(b=>b.classList.toggle('active',b===btn));
+ declValues={};initDeclValues();renderDeclFields();$('#declarationPreview').classList.remove('show');$('#printDecl').disabled=true;$('#declSaveState').textContent='已切换模板，请核对字段';
+});
+$('#addDeclProduct').onclick=()=>{declProducts.push({hs:'',name:'',qty:'',unitPrice:'',total:'',currency:'',origin:'',destination:''});renderDeclProducts()};
+$('#saveDecl').onclick=saveDeclDraft;
+$('#makeDeclPreview').onclick=()=>{declValues={...declValues};document.querySelectorAll('[data-decl-field]').forEach(el=>declValues[el.dataset.declField]=el.value);buildDeclPreview()};
+$('#printDecl').onclick=()=>{document.body.classList.add('print-declaration');window.print();setTimeout(()=>document.body.classList.remove('print-declaration'),500)};
+try{
+ const saved=JSON.parse(localStorage.getItem('customs_declaration_draft_v1')||'null');
+ if(saved&&saved.mode){declMode=saved.mode;declValues=saved.values||{};declProducts=saved.products||[];document.querySelectorAll('[data-decl-mode]').forEach(b=>b.classList.toggle('active',b.dataset.declMode===declMode));}
+}catch(e){}
+initDeclValues();renderDeclFields();
+
+renderTabs();renderFields();
+</script>
+</body></html>
